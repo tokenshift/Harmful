@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Harmful {
     /// <summary>
@@ -9,8 +10,20 @@ namespace Harmful {
         /// Converts a Unicode code point to a UTF-16 string
         /// (native C# string).
         /// </summary>
-        public static string FromCode(int code) {
-            throw new NotImplementedException();
+        public static string FromCode(uint code) {
+            ushort lead, trail;
+
+            switch (FromCode(code, out lead, out trail)) {
+                case 1:
+                    return new string(Convert.ToChar(lead), 1);
+                case 2:
+                    return new string(new[] {
+                        Convert.ToChar(lead),
+                        Convert.ToChar(trail)
+                    });
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -27,8 +40,29 @@ namespace Harmful {
         /// Either 1 or 2, depending how many 16-bit units were needed to encode the
         /// character. If 1, the 'trail' component will be 0; only the 'lead' is relevant.
         /// </returns>
-        public static int FromCode(int code, out ushort lead, out ushort trail) {
-            throw new NotImplementedException();
+        public static int FromCode(uint code, out ushort lead, out ushort trail) {
+            // This implementation is derived from RFC 2781, section 2.1.
+            // http://tools.ietf.org/html/rfc2781
+
+            if (code < 0x10000) {
+                lead = (ushort) code;
+                trail = 0;
+                return 1;
+            }
+
+            // Code is now within 20 bits.
+            code = code - 0x10000;
+
+            lead = 0xD800;
+            trail = 0xDC00;
+
+            // Lead gets higher-order 10 bits.
+            lead = (ushort) (lead | (ushort) (code >> 10));
+
+            // Trail gets lower-order 10 bits.
+            trail = (ushort) (trail | (ushort) (code & 0x3FF));
+
+            return 2;
         }
     }
 }

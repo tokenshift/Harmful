@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Harmful.Test {
     [TestClass]
@@ -7,7 +6,7 @@ namespace Harmful.Test {
         [TestMethod]
         public void TestFromLatinCharacter() {
             ushort lead, trail;
-            Assert.AreEqual(0, Utf16.FromCode(0x7a, out lead, out trail));
+            Assert.AreEqual(1, Utf16.FromCode(0x7a, out lead, out trail));
 
             Assert.AreEqual(0x7a, lead);
             Assert.AreEqual(0, trail);
@@ -18,7 +17,7 @@ namespace Harmful.Test {
         [TestMethod]
         public void TestHighSingleComponent() {
             ushort lead, trail;
-            Assert.AreEqual(0, Utf16.FromCode(0x6c34, out lead, out trail));
+            Assert.AreEqual(1, Utf16.FromCode(0x6c34, out lead, out trail));
 
             Assert.AreEqual(0x6c34, lead);
             Assert.AreEqual(0, trail);
