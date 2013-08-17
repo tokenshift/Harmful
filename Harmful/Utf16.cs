@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace Harmful {
     /// <summary>
@@ -63,6 +62,59 @@ namespace Harmful {
             trail = (ushort) (trail | (ushort) (code & 0x3FF));
 
             return 2;
+        }
+        
+        /// <summary>
+        /// Decodes the leading and trailing surrogates into a
+        /// unicode code point.
+        /// </summary>
+        /// <returns>2 if the trail was part of the surrogate pair, 1 otherwise.</returns>
+        public static int ToCode(out uint code, ushort lead, ushort trail = 0) {
+            if (lead < 0xD800 || lead > 0xDFFF) {
+                code = lead;
+                return 1;
+            }
+
+            if (lead < 0xD800 || lead > 0xDBFF) {
+                throw new ArgumentException("Lead surrogate results in invalid UTF-16 character data.", "lead");
+            }
+
+            if (trail < 0xDC00 || trail > 0xDFFF) {
+                throw new ArgumentException("Trail surrogate results in invalid UTF-16 character data.", "trail");
+            }
+
+            code = 0;
+
+            code = code | ((uint) (lead & 0x3FF) << 10);
+            code = code | (uint) (trail & 0x3FF);
+            code += 0x10000;
+
+            return 2;
+        }
+
+        /// <summary>
+        /// Decodes a UTF-16 character or surrogate pair within a string
+        /// into a unicode code point.
+        /// </summary>
+        /// <param name="code">The decoded unicode code point.</param>
+        /// <param name="text">The input text containing the character(s) to be decoded.</param>
+        /// <param name="offset">The starting location of the character(s) in the string (defaults to 0).</param>
+        /// <returns>2 if the trail was part of the surrogate pair, 1 otherwise.</returns>
+        public static int ToCode(out uint code, string text, int offset = 0) {
+            if (text == null) {
+                throw new ArgumentNullException("text");
+            }
+
+            if (text.Length == 0) {
+                throw new ArgumentException("Input text must contain character data.", "text");
+            }
+
+            if (text.Length > 1) {
+                return ToCode(out code, text[0], text[1]);
+            }
+            else {
+                return ToCode(out code, text[0]);
+            }
         }
     }
 }
