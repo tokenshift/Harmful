@@ -109,11 +109,15 @@ namespace Harmful {
                 throw new ArgumentException("Input text must contain character data.", "text");
             }
 
-            if (text.Length > 1) {
-                return ToCode(out code, text[0], text[1]);
+            if (offset >= text.Length) {
+                throw new ArgumentOutOfRangeException("offset");
+            }
+
+            if (offset + 1 < text.Length) {
+                return ToCode(out code, text[offset], text[offset + 1]);
             }
             else {
-                return ToCode(out code, text[0]);
+                return ToCode(out code, text[offset]);
             }
         }
     }
